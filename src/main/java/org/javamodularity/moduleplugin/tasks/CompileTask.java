@@ -13,13 +13,13 @@ public class CompileTask {
         if (compileJava != null) {
             compileJava.getExtensions().create("moduleOptions", ModuleOptions.class, project);
 
-            compileJava.doFirst(new Action<Task>() {
+            project.afterEvaluate(new Action<>() {
 
                 /* (non-Javadoc)
                  * @see org.gradle.api.Action#execute(java.lang.Object)
                  */
                 @Override
-                public void execute(Task task) {
+                public void execute(Project p) {
                     CompileJavaTaskMutator.mutateJavaCompileTask(project, compileJava);
                 }
 

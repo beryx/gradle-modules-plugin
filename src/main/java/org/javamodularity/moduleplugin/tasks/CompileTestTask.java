@@ -6,10 +6,10 @@ import java.util.function.Consumer;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.compile.GroovyCompile;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.javamodularity.moduleplugin.TestEngine;
 
@@ -23,13 +23,13 @@ public class CompileTestTask {
         compileTestJava.getExtensions().create("moduleOptions", ModuleOptions.class, project);
         SourceSet testSourceSet = javaConvention.getSourceSets().getByName(SourceSet.TEST_SOURCE_SET_NAME);
 
-        compileTestJava.doFirst(new Action<Task>() {
+        project.afterEvaluate(new Action<Project>() {
 
             /* (non-Javadoc)
              * @see org.gradle.api.Action#execute(java.lang.Object)
              */
             @Override
-            public void execute(Task task) {
+            public void execute(Project p) {
                 var args = new ArrayList<>(compileTestJava.getOptions().getCompilerArgs());
                 args.addAll(List.of(
                         "--module-path", compileTestJava.getClasspath()
@@ -65,9 +65,12 @@ public class CompileTestTask {
 
                 compileTestJava.getOptions().setCompilerArgs(args);
                 compileTestJava.setClasspath(project.files());
-            }
 
+                GroovyCompile compileTestGroovy = (GroovyCompile) project.getTasks().findByName("compileTestGroovy");
+                if (compileTestGroovy != null) {
+                    compileTestGroovy.setSource("src/no.such.dir");
+                }
+            }
         });
     }
-
 }
