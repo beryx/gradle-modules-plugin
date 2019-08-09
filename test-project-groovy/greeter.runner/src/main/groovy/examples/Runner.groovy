@@ -1,9 +1,11 @@
 package examples
 
 import examples.greeter.api.Greeter
+import groovy.transform.CompileStatic
 
 import java.util.ServiceLoader
 
+@CompileStatic
 class Runner {
     static void main(String[] args) {
         Greeter greeter = ServiceLoader.load(Greeter.class).findFirst().orElseThrow { new RuntimeException('No Greeter found!') }
@@ -14,9 +16,9 @@ class Runner {
             throw new RuntimeException("Couldn't load resource")
         }
 
-        ModuleLayer.boot().modules().stream()
-                .map{ it.name }
-                .filter { it == 'java.sql' }
-                .findAny().orElseThrow { new RuntimeException('Expected module java.sql not found') }
+        def moduleNames = ModuleLayer.boot().modules().collect { it.name }
+        if(!moduleNames.contains('java.sql')) {
+            throw new RuntimeException('Expected module java.sql not found')
+        }
     }
 }

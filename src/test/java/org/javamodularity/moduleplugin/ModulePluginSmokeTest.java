@@ -31,12 +31,12 @@ class ModulePluginSmokeTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { /*"test-project", "test-project-kotlin",*/ "test-project-groovy" })
+    @ValueSource(strings = { "test-project-groovy" })
     void smokeTest(String projectName) {
         var result = GradleRunner.create()
                 .withProjectDir(new File(projectName + "/"))
                 .withPluginClasspath(pluginClasspath)
-                .withGradleVersion("4.10.2")
+                .withGradleVersion("5.5")
                 .withArguments("-c", "smoke_test_settings.gradle", "clean", "build", "run", "--info", "--stacktrace")
                 .forwardOutput()
                 .build();
