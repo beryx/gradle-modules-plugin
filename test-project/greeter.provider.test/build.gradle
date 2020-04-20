@@ -4,5 +4,5 @@ dependencies {
 }
 
 patchModules.config = [
-        'java.annotation=jsr305-3.0.2.jar'
+        'java.annotation=jsr305-3.0.2.jar,jsr250-api-1.0.jar'
 ]

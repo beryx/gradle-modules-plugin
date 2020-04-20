@@ -4,9 +4,12 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.javamodularity.moduleplugin.extensions.PatchModuleExtension;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class PatchModuleResolver {
@@ -38,13 +41,24 @@ public final class PatchModuleResolver {
 
     private String resolvePatchModuleValue(String[] parts) {
         String moduleName = parts[0];
-        String jarName = parts[1];
+        String[] jarNames = parts[1].split("[,;:]");
 
-        String jarPath = jarNameResolver.apply(jarName);
-        if (jarPath.isEmpty()) {
-            LOGGER.warn("Skipped patching {} into {}", jarName, moduleName);
-            return null;
-        }
-        return moduleName + "=" + jarPath;
+        LOGGER.info("Attempting to patch {} into {}", Arrays.asList(jarNames), moduleName);
+        String jarPaths = Arrays.stream(jarNames)
+                .map(jarName -> {
+                    String jarPath = jarNameResolver.apply(jarName);
+                    if (jarPath.isEmpty()) {
+                        LOGGER.warn("Skipped patching {} into {}", jarName, moduleName);
+                        return null;
+                    }
+                    return jarPath;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining(File.pathSeparator));
+
+        if(jarPaths.isEmpty()) return null;
+        String patchModuleOption = moduleName + "=" + jarPaths;
+        LOGGER.info("Adding compiler option: --patch-module={}", jarPaths);
+        return patchModuleOption;
     }
 }

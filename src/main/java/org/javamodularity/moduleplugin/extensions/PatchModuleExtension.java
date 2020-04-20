@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PatchModuleExtension {
     private List<String> config = new ArrayList<>();
@@ -19,7 +20,10 @@ public class PatchModuleExtension {
 
     public void setConfig(List<String> config) {
         this.config = config;
-        indexByJar = config.stream().map(s -> s.split("=")).collect(Collectors.toMap(c -> c[1], c -> c[0]));
+        indexByJar = config.stream()
+                .map(s -> s.split("="))
+                .flatMap(c -> Stream.of(c[1].split("[,;:]")).map(jarName -> new String[] {c[0], jarName}))
+                .collect(Collectors.toMap(c -> c[1], c -> c[0]));
     }
 
     public PatchModuleResolver resolvePatched(FileCollection classpath) {
